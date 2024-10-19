@@ -1,8 +1,11 @@
-import { useState } from "react";
-import "./App.css";
+import Login from "./components/Login";
 
 function App() {
-  return <></>;
+  return (
+    <>
+      <Login></Login>
+    </>
+  );
 }
 
 export default App;

@@ -1,0 +1,61 @@
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: lightblue;
+  flex-direction: column;
+}
+
+.intro {
+  text-align: center; /* Center text within .intro */
+  padding-bottom: 10px;
+}
+
+.btn-custom {
+  padding: 10px 20px;
+  border-radius: 25px; /* Rounded edges */
+  font-size: 16px; /* Larger text */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.btn-custom:hover {
+  background-color: #007bff; /* Change to primary color on hover */
+  color: white; /* White text on hover */
+  transform: translateY(-2px); /* Slight lift on hover */
+}
+
+.register-btn {
+  background-color: #28a745; /* Green for Register */
+  color: white;
+}
+
+.login-btn {
+  background-color: #ffc107; /* Yellow for Login */
+  color: white;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-form {
+  margin-bottom: 15px;
+}
+
+.login-button {
+  width: 100%;
+}
