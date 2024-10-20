@@ -1,11 +1,7 @@
 import express from "express";
 const app = express();
+const port = 3000;
 
 app.set("view engine", "ejs");
-
-app.get("/", (req, res) => {
-  console.log("here");
-  res.render("index");
-});
-
-app.listen(3000);
+console.log("123");
+app.listen(port);
