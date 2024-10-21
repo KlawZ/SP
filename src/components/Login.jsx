@@ -40,13 +40,6 @@ function Login() {
           <h2 className="login-title">Log In</h2>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="login-form">
-              <Form.Select value={role} onChange={updateRole}>
-                <option value="investor">Investor</option>
-                <option value="advisor">Advisor</option>
-                <option value="administrator">Administrator</option>
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="login-form">
               <Form.Label>Username</Form.Label>
               <Form.Control
                 type="text"
