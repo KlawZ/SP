@@ -1,14 +1,39 @@
 import express from "express";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple"; // Correctly import the connect-pg-simple package
+import pg from "pg";
+const { Pool } = pg;
+const PgSession = connectPgSimple(session);
 const app = express();
 const port = 3000;
 import { query } from "../db/index.js";
 
 app.use(express.json());
-//app.set("view engine", "ejs");
+
+app.use(
+  session({
+    store: new PgSession({
+      pool: new Pool({
+        user: "postgres",
+        host: "localhost",
+        database: "tradelearn",
+        password: "password123",
+        port: "5432",
+      }), // Use the PostgreSQL pool to store session data
+    }),
+    secret: "your_secret_key", // Secret key to sign the session ID
+    resave: false, // Prevent session from being resaved if unmodified
+    saveUninitialized: false, // Do not save empty sessions
+    cookie: {
+      secure: false, // Set to true in production (with HTTPS)
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+      maxAge: 3600000, // Session expiration time (1 hour)
+    },
+  })
+);
 
 //create user
-app.post("/register", async (req, res) => {
-  console.log(req.body); // This will now log the request body
+app.post("/api/v1/users", async (req, res) => {
   try {
     const results = await query(
       "INSERT INTO users (name, password, role) VALUES ($1, $2, $3)",
@@ -26,12 +51,69 @@ app.post("/register", async (req, res) => {
 });
 
 //get user
-app.get("/api/v1/users/:id", async (req, res) => {
-  console.log(req.params.id);
+app.get("/api/v1/users/", async (req, res) => {
+  const { name, password } = req.body;
+
   try {
-    const results = await query("SELECT * FROM users WHERE users_id = $1", [
-      req.params.id,
-    ]);
+    const userResult = await query(
+      "SELECT * FROM users WHERE name = $1 AND password = $2",
+      [name, password]
+    );
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const user = userResult.rows[0];
+    if (user.role == "investor") {
+      req.session.investor_id = user.users_id;
+    }
+    if (user.role == "advisor") {
+      req.session.advisor_id = user.users_id;
+    }
+    if (user.role == "administrator") {
+      req.session.administrator_id = user.users_id;
+    }
+
+    res.status(201).json({
+      data: userResult.rows[0],
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get all advisors
+app.get("/api/v1/advisors", async (req, res) => {
+  try {
+    const role = "advisor";
+    const results = await query(
+      "SELECT users_id, name FROM users WHERE role = $1",
+      [role]
+    ); // Adjust query based on your database structure
+    res.status(200).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while retrieving advisors." });
+  }
+});
+
+//proposal
+//create
+app.post("/api/v1/proposal", async (req, res) => {
+  try {
+    const results = await query(
+      "INSERT INTO propose (content, quantity, stock_id, advisor_id, investor_id) VALUES ($1, $2, $3, $4, $5)",
+      [
+        req.body.content,
+        req.body.quantity,
+        req.body.stock_id,
+        req.body.advisor_id,
+        req.session.investor_id,
+      ]
+    );
     res.status(201).json({
       data: results.rows[0],
     });
@@ -40,44 +122,35 @@ app.get("/api/v1/users/:id", async (req, res) => {
   }
 });
 
-//proposal
-//create
-app.post(
-  "/api/v1/proposal/:stock_id/:advisor_id/:investor_id",
-  async (req, res) => {
-    console.log(req.body); // This will now log the request body
-    try {
-      const results = await query(
-        "INSERT INTO propose (content, quantity, stock_id, advisor_id, investor_id) VALUES ($1, $2, $3, $4, $5)",
-        [
-          req.body.content,
-          req.body.quantity,
-          req.params.stock_id,
-          req.params.advisor_id,
-          req.params.investor_id,
-        ]
-      );
-      console.log(results);
-      res.status(201).json({
-        content: req.body.content,
-        quantity: req.body.quantity,
-        stock_id: req.body.stock_id,
-        advisor_id: req.body.advisor_id,
-        investor_id: req.body.investor_id,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-);
-
-//get all
-app.get("/api/v1/users/:investor_id", async (req, res) => {
-  console.log(req.params.id);
+//get all for investor
+app.get("/api/v1/investors/proposals", async (req, res) => {
   try {
+    console.log(req.session.advisor_id);
+    if (!req.session.investor_id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
     const results = await query(
-      "SELECT * FROM proposal WHERE investor_id = $1",
-      [req.params.investor_id]
+      "SELECT * FROM proposals WHERE investor_id = $1",
+      [req.session.investor_id]
+    );
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get all for advisor
+app.get("/api/v1/advisors/proposals", async (req, res) => {
+  try {
+    console.log(req.session.advisor_id);
+    if (!req.session.investor_id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const results = await query(
+      "SELECT * FROM proposals WHERE advisor_id = $1",
+      [req.session.advisor_id]
     );
     res.status(201).json({
       data: results.rows,
@@ -88,41 +161,38 @@ app.get("/api/v1/users/:investor_id", async (req, res) => {
 });
 
 //review
-/*app.post(
-  "/api/v1/proposal/:advisor_id",
-  async (req, res) => {
-    console.log(req.body); // This will now log the request body
-    try {
-      const results = await query(
-        "INSERT INTO propose (investor_id, advisor_id, rating, feedback) VALUES ($1, $2, $3, $4)",
-        [
-          req.body.investor_id,
-          req.body.advisor_id,
-          req.body.rating,
-          req.body.feedback
-        ]
-      );
-      console.log(results);
-      res.status(201).json({
-        investor_id: req.body.investor_id,
-        advisor_id: req.body.advisor_id,
-        rating: req.body.rating,
-        feedback: req.body.feedback
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-);
-
-//get all
-app.get("/api/v1/users/:investor_id", async (req, res) => {
-  console.log(req.params.id);
+app.post("/api/v1/advisors/:advisor_id/reviews", async (req, res) => {
   try {
     const results = await query(
-      "SELECT * FROM proposal WHERE investor_id = $1",
-      [req.params.investor_id]
+      "INSERT INTO review (investor_id, advisor_id, rating, feedback) VALUES ($1, $2, $3, $4)",
+      [
+        req.body.investor_id,
+        req.body.advisor_id,
+        req.body.rating,
+        req.body.feedback,
+      ]
     );
+    res.status(201).json({
+      investor_id: req.body.investor_id,
+      advisor_id: req.body.advisor_id,
+      rating: req.body.rating,
+      feedback: req.body.feedback,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get all
+app.get("/api/v1/advisors/reviews", async (req, res) => {
+  try {
+    console.log(req.session.advisor_id);
+    if (!req.session.advisor_id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const results = await query("SELECT * FROM reviews WHERE advisor_id = $1", [
+      req.session.advisor_id,
+    ]);
     res.status(201).json({
       data: results.rows,
     });
@@ -130,21 +200,117 @@ app.get("/api/v1/users/:investor_id", async (req, res) => {
     console.log(error);
   }
 });
- */
 
 //post
-/* */
+app.post("/api/v1/advisors/:advisor_id/posts", async (req, res) => {
+  try {
+    const results = await query(
+      "INSERT INTO post (content, advisor_id) VALUES ($1, $2)",
+      [req.body.advisor_id, req.body.content]
+    );
+    req.session.post_id = res.status(201).json({
+      advisor_id: req.body.advisor_id,
+      content: req.body.content,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-//update a proposal
+//get all
+app.get("/api/v1/investors/posts", async (req, res) => {
+  try {
+    const results = await query("SELECT * FROM posts");
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-//update post which then updates the portfolio?
+//update a post
+app.put("/api/v1/posts/vote", async (req, res) => {
+  const { post_id, voteType } = req.body; // voteType can be 'upvote' or 'downvote'
 
-/*app.get("/test", async (req, res) => {
-  const results = await query("SELECT * FROM users");
-  console.log(results.rows);
-});*/
+  try {
+    let queryText;
+    if (voteType === "upvote") {
+      queryText =
+        "UPDATE posts SET upvotes = upvotes + 1 WHERE post_id = $1 RETURNING *";
+    } else if (voteType === "downvote") {
+      queryText =
+        "UPDATE posts SET downvotes = downvotes + 1 WHERE post_id = $1 RETURNING *";
+    } else {
+      return res.status(400).json({ error: "Invalid vote type" });
+    }
 
-//
+    const result = await query(queryText, [post_id]);
+
+    res.status(200).json({
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//update proposal which then updates the portfolio? and then updates the transaction table
+app.put("/api/v1/proposals/update", async (req, res) => {
+  const { proposal_id, type, symbol, accepted, price } = req.body;
+
+  try {
+    const proposalResult = await query(
+      "UPDATE proposal SET accepted = $1 WHERE id = $2 RETURNING *",
+      [accepted, proposal_id]
+    );
+    if (proposalResult.rowCount === 0) {
+      return res.status(404).json({ error: "Proposal not found" });
+    }
+    if (accepted) {
+      const proposal = proposalResult.rows[0]; // Get the proposal details
+
+      /*const price = await query(
+        "SELECT current_price FROM proposals INNER JOIN stocks ON proposals.stock_id = stocks.symbol WHERE stocks.symbol = 'AAPL'"
+      );*/
+
+      // Insert into the transactions table (assuming it has these columns)
+      await query(
+        "INSERT INTO transactions (proposal_id, amount, type) VALUES ($1, $2, $3)",
+        [proposal.proposal_id, proposal.quantity] // times something
+      );
+
+      await query(
+        "INSERT INTO portfolio (user_id, stock_id, quantity) VALUES ($1, $2, $3) " +
+          "ON CONFLICT (user_id, stock_id) DO UPDATE SET quantity = portfolio.quantity + $3",
+        [proposal.investor_id, proposal.stock_id, proposal.quantity]
+      );
+    }
+
+    res.status(200).json({
+      message: accepted
+        ? "Proposal accepted and transaction recorded."
+        : "Proposal declined.",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//get all stocks
+app.get("/api/v1/stocks", async (req, res) => {
+  try {
+    const results = await query("SELECT * FROM stocks");
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is up and listening on port ${port} `);
 });

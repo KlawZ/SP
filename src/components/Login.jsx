@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import "./Login.css";
 
-function Login() {
+function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
@@ -13,8 +13,13 @@ function Login() {
   }
 
   const handleSubmit = () => {
-    //event.preventDefault();
-    console.log("Login attempted with:", { username, password, role });
+    event.preventDefault();
+    if (username === "user" && password === "password") {
+      console.log("testing");
+      onLogin();
+    } else {
+      alert("Invalid credentials");
+    }
   };
 
   return (

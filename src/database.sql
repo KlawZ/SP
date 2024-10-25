@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.post
+CREATE TABLE IF NOT EXISTS public.posts
 (
     post_id serial NOT NULL,
     content text,
@@ -14,11 +14,11 @@ CREATE TABLE IF NOT EXISTS public."users"
     name text NOT NULL,
     password text NOT NULL,
     role text NOT NULL,
-    advisor_id integer,
+    balance integer,
     PRIMARY KEY (users_id)
 );
 
-CREATE TABLE IF NOT EXISTS public.stock
+CREATE TABLE IF NOT EXISTS public.stocks
 (
     symbol text NOT NULL,
     name text NOT NULL,
@@ -29,44 +29,46 @@ CREATE TABLE IF NOT EXISTS public.stock
     PRIMARY KEY (symbol)
 );
 
-CREATE TABLE IF NOT EXISTS public.propose
+CREATE TABLE IF NOT EXISTS public.proposals
 (
-    propose_id serial NOT NULL,
+    proposal_id serial NOT NULL,
     content text,
     accepted boolean NOT NULL,
     quantity integer NOT NULL,
     stock_id text NOT NULL,
     advisor_id integer NOT NULL,
     investor_id integer NOT NULL,
-    PRIMARY KEY (propose_id)
+    type text NOT NULL
+    PRIMARY KEY (proposal_id)
 );
 
-CREATE TABLE IF NOT EXISTS public.transaction
+CREATE TABLE IF NOT EXISTS public.transactions
 (
     transaction_id serial NOT NULL,
     amount integer NOT NULL,
     type text NOT NULL,
-    propose_id integer NOT NULL,
+    proposal_id integer NOT NULL,
     PRIMARY KEY (transaction_id)
 );
 
 CREATE TABLE IF NOT EXISTS public.stock_users
 (
     stock_symbol text NOT NULL,
-    users_users_id serial NOT NULL
+    users_id integer NOT NULL,
+    quantity integer NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS public.review
+CREATE TABLE IF NOT EXISTS public.reviews
 (
-    id serial NOT NULL,
+    review_id serial NOT NULL,
     investor_id integer NOT NULL,
     advisor_id integer NOT NULL,
     rating integer NOT NULL,
     feedback text,
-    PRIMARY KEY (id)
+    PRIMARY KEY (review_id)
 );
 
-ALTER TABLE IF EXISTS public.post
+ALTER TABLE IF EXISTS public.posts
     ADD FOREIGN KEY (advisor_id)
     REFERENCES public."users" (users_id) MATCH SIMPLE
     ON UPDATE NO ACTION
@@ -82,7 +84,7 @@ ALTER TABLE IF EXISTS public."users"
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.propose
+ALTER TABLE IF EXISTS public.proposals
     ADD FOREIGN KEY (investor_id)
     REFERENCES public."users" (users_id) MATCH SIMPLE
     ON UPDATE NO ACTION
@@ -90,7 +92,7 @@ ALTER TABLE IF EXISTS public.propose
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.propose
+ALTER TABLE IF EXISTS public.proposals
     ADD FOREIGN KEY (advisor_id)
     REFERENCES public."users" (users_id) MATCH SIMPLE
     ON UPDATE NO ACTION
@@ -98,17 +100,17 @@ ALTER TABLE IF EXISTS public.propose
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.propose
+ALTER TABLE IF EXISTS public.proposals
     ADD FOREIGN KEY (stock_id)
-    REFERENCES public.stock (symbol) MATCH SIMPLE
+    REFERENCES public.stocks (symbol) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.transaction
-    ADD FOREIGN KEY (propose_id)
-    REFERENCES public.propose (propose_id) MATCH SIMPLE
+ALTER TABLE IF EXISTS public.transactions
+    ADD FOREIGN KEY (proposal_id)
+    REFERENCES public.proposals (proposal_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
@@ -116,21 +118,21 @@ ALTER TABLE IF EXISTS public.transaction
 
 ALTER TABLE IF EXISTS public.stock_users
     ADD FOREIGN KEY (stock_symbol)
-    REFERENCES public.stock (symbol) MATCH SIMPLE
+    REFERENCES public.stocks (symbol) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
 ALTER TABLE IF EXISTS public.stock_users
-    ADD FOREIGN KEY (users_users_id)
+    ADD FOREIGN KEY (users_id)
     REFERENCES public."users" (users_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.review
+ALTER TABLE IF EXISTS public.reviews
     ADD FOREIGN KEY (investor_id)
     REFERENCES public."users" (users_id) MATCH SIMPLE
     ON UPDATE NO ACTION
@@ -138,7 +140,7 @@ ALTER TABLE IF EXISTS public.review
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.review
+ALTER TABLE IF EXISTS public.reviews
     ADD FOREIGN KEY (advisor_id)
     REFERENCES public."users" (users_id) MATCH SIMPLE
     ON UPDATE NO ACTION
