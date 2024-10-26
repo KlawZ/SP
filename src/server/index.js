@@ -2,12 +2,15 @@ import express from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple"; // Correctly import the connect-pg-simple package
 import pg from "pg";
+import cors from "cors";
+
 const { Pool } = pg;
 const PgSession = connectPgSimple(session);
 const app = express();
 const port = 3000;
 import { query } from "../db/index.js";
 
+app.use(cors());
 app.use(express.json());
 
 app.use(
@@ -52,7 +55,7 @@ app.post("/api/v1/users", async (req, res) => {
 
 //get user
 app.get("/api/v1/users/", async (req, res) => {
-  const { name, password } = req.body;
+  const { name, password } = req.query;
 
   try {
     const userResult = await query(
@@ -72,9 +75,9 @@ app.get("/api/v1/users/", async (req, res) => {
     if (user.role == "administrator") {
       req.session.administrator_id = user.users_id;
     }
-
+    console.log("running");
     res.status(201).json({
-      data: userResult.rows[0],
+      data: user,
     });
   } catch (error) {
     console.log(error);

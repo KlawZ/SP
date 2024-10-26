@@ -1,24 +1,55 @@
 import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
+import { useStateContext } from "../context/StateContext";
+import axios from "axios";
+
 import "./Login.css";
 
 function Login({ onLogin }) {
+  const { setUserData } = useStateContext();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [formType, setFormType] = useState("none");
+  const [message, setMessage] = useState("");
 
   function updateRole(event) {
     setRole(event.target.value);
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (username === "user" && password === "password") {
-      console.log("testing");
-      onLogin();
-    } else {
-      alert("Invalid credentials");
+    if (formType == "login") {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/v1/users/",
+          {
+            params: {
+              name: username,
+              password: password,
+            },
+          }
+        );
+        setUserData(response.data.data.users_id, response.data.data.name);
+        onLogin();
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          setMessage("Invalid Credentials. Try again");
+        } else {
+          console.log("An error occurred:", error.message);
+        }
+      }
+    }
+    if (formType == "register") {
+      try {
+        const response = await axios.post(
+          "http://localhost:3000/api/v1/users/",
+          { name: username, password: password, role: role }
+        );
+        if (response.status === 201) {
+          setMessage("User registered succesfully");
+        }
+      } catch (error) {}
     }
   };
 
@@ -66,6 +97,7 @@ function Login({ onLogin }) {
               Submit
             </Button>
           </Form>
+          {message != "" ? message : ""}
         </div>
       )}
 
@@ -102,6 +134,7 @@ function Login({ onLogin }) {
               Submit
             </Button>
           </Form>
+          {message != "" ? message : ""}
         </div>
       )}
       {formType === "none" && <></>}
