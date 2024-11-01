@@ -15,7 +15,7 @@ INSERT INTO public.stocks (symbol, name, market, sector, current_price, "time") 
 ('TSLA', 'Tesla, Inc.', 'NASDAQ', 'Automotive', 72.00, NOW()),
 ('MSFT', 'Microsoft Corporation', 'NASDAQ', 'Technology', 13.00, NOW());
 */
-
+SELECT * FROM users;
 -- second
 /*-- Inserting mock data into the "posts" table
 INSERT INTO public.posts (content, upvotes, downvotes, advisor_id) VALUES
@@ -67,3 +67,14 @@ INSERT INTO public.stock_users (stock_symbol, users_id, quantity) VALUES
 ('GOOGL', 20, 10),
 ('MSFT', 18, 30);
 */
+
+SELECT * FROM stocks;
+--session table
+/*
+CREATE TABLE session (
+    sid            VARCHAR NOT NULL PRIMARY KEY,  -- Session ID
+    sess           JSON NOT NULL,                -- Session data (stored as JSON)
+    expire         TIMESTAMP(6) NOT NULL         -- Expiration time of the session
+);
+*/
+SELECT current_price FROM proposals INNER JOIN stocks ON proposals.stock_id = stocks.symbol WHERE stocks.symbol = 'AAPL';

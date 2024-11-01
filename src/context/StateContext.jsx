@@ -9,14 +9,21 @@ export const useStateContext = () => {
 export const StateProvider = ({ children }) => {
   const [userID, setUserID] = useState(null);
   const [username, setUsername] = useState("");
+  const [stocks, setStocks] = useState({});
 
   const setUserData = (userID, username) => {
     setUserID(userID);
     setUsername(username);
   };
 
+  const setStockData = (data) => {
+    setStocks(symbols);
+  };
+
   return (
-    <StateContext.Provider value={{ userID, username, setUserData }}>
+    <StateContext.Provider
+      value={{ userID, username, setUserData, stocks, setStockSymbols }}
+    >
       {children}
     </StateContext.Provider>
   );

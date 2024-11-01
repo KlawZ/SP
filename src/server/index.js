@@ -3,12 +3,12 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple"; // Correctly import the connect-pg-simple package
 import pg from "pg";
 import cors from "cors";
+import { query } from "../db/index.js";
 
 const { Pool } = pg;
 const PgSession = connectPgSimple(session);
 const app = express();
 const port = 3000;
-import { query } from "../db/index.js";
 
 app.use(cors());
 app.use(express.json());
