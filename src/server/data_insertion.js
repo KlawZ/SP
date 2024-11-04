@@ -26,4 +26,4 @@ function updateAll() {
   });
 }
 
-setInterval(updateAll, 10000);
+setInterval(updateAll, 5000);

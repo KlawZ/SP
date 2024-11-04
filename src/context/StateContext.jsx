@@ -9,20 +9,24 @@ export const useStateContext = () => {
 export const StateProvider = ({ children }) => {
   const [userID, setUserID] = useState(null);
   const [username, setUsername] = useState("");
-  const [stocks, setStocks] = useState({});
+  const [stocks, setStocks] = useState([]);
 
   const setUserData = (userID, username) => {
     setUserID(userID);
     setUsername(username);
   };
 
-  const setStockData = (data) => {
-    setStocks(symbols);
+  const setStockData = (newData) => {
+    if (!Array.isArray(newData)) {
+      console.error("Expected newData to be an array");
+      return;
+    }
+    setStocks((prevStocks) => [...prevStocks, ...newData]);
   };
 
   return (
     <StateContext.Provider
-      value={{ userID, username, setUserData, stocks, setStockSymbols }}
+      value={{ userID, username, setUserData, stocks, setStockData }}
     >
       {children}
     </StateContext.Provider>

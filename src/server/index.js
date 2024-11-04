@@ -305,7 +305,9 @@ app.put("/api/v1/proposals/update", async (req, res) => {
 //get all stocks
 app.get("/api/v1/stocks", async (req, res) => {
   try {
-    const results = await query("SELECT * FROM stocks");
+    const results = await query(
+      "SELECT symbol, current_price, time FROM stocks"
+    );
     res.status(201).json({
       data: results.rows,
     });
