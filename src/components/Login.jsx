@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import { useStateContext } from "../context/StateContext";
 import axios from "axios";
-
 import "./Login.css";
 
 function Login({ onLogin }) {
@@ -30,7 +29,12 @@ function Login({ onLogin }) {
             },
           }
         );
-        setUserData(response.data.data.users_id, response.data.data.name);
+        setUserData(
+          response.data.data.users_id,
+          response.data.data.name,
+          response.data.data.role,
+          response.data.data.balance
+        );
         onLogin();
       } catch (error) {
         if (error.response && error.response.status === 401) {

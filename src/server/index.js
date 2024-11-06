@@ -1,48 +1,29 @@
 import express from "express";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple"; // Correctly import the connect-pg-simple package
-import pg from "pg";
 import cors from "cors";
 import { query } from "../db/index.js";
 
-const { Pool } = pg;
-const PgSession = connectPgSimple(session);
 const app = express();
 const port = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-app.use(
-  session({
-    store: new PgSession({
-      pool: new Pool({
-        user: "postgres",
-        host: "localhost",
-        database: "tradelearn",
-        password: "password123",
-        port: "5432",
-      }), // Use the PostgreSQL pool to store session data
-    }),
-    secret: "your_secret_key", // Secret key to sign the session ID
-    resave: false, // Prevent session from being resaved if unmodified
-    saveUninitialized: false, // Do not save empty sessions
-    cookie: {
-      secure: false, // Set to true in production (with HTTPS)
-      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-      maxAge: 3600000, // Session expiration time (1 hour)
-    },
-  })
-);
-
 //create user
 app.post("/api/v1/users", async (req, res) => {
   try {
-    const results = await query(
-      "INSERT INTO users (name, password, role) VALUES ($1, $2, $3)",
-      [req.body.name, req.body.password, req.body.role]
-    );
-    console.log(results);
+    let results;
+    if (req.body.role === "investor") {
+      results = await query(
+        "INSERT INTO users (name, password, role, balance) VALUES ($1, $2, $3, $4) RETURNING *",
+        [req.body.name, req.body.password, req.body.role, 10000]
+      );
+    } else {
+      results = await query(
+        "INSERT INTO users (name, password, role) VALUES ($1, $2, $3) RETURNING *",
+        [req.body.name, req.body.password, req.body.role]
+      );
+    }
+    console.log(results.rows[0]);
     res.status(201).json({
       username: req.body.name,
       password: req.body.password,
@@ -66,15 +47,6 @@ app.get("/api/v1/users/", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const user = userResult.rows[0];
-    if (user.role == "investor") {
-      req.session.investor_id = user.users_id;
-    }
-    if (user.role == "advisor") {
-      req.session.advisor_id = user.users_id;
-    }
-    if (user.role == "administrator") {
-      req.session.administrator_id = user.users_id;
-    }
     console.log("running");
     res.status(201).json({
       data: user,
@@ -108,13 +80,14 @@ app.get("/api/v1/advisors", async (req, res) => {
 app.post("/api/v1/proposal", async (req, res) => {
   try {
     const results = await query(
-      "INSERT INTO propose (content, quantity, stock_id, advisor_id, investor_id) VALUES ($1, $2, $3, $4, $5)",
+      "INSERT INTO proposals (content, quantity, stock_id, advisor_id, investor_id, type) VALUES ($1, $2, $3, $4, $5, $6)",
       [
         req.body.content,
         req.body.quantity,
         req.body.stock_id,
         req.body.advisor_id,
-        req.session.investor_id,
+        req.body.investor_id,
+        req.body.type,
       ]
     );
     res.status(201).json({
@@ -308,6 +281,18 @@ app.get("/api/v1/stocks", async (req, res) => {
     const results = await query(
       "SELECT symbol, current_price, time FROM stocks"
     );
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get all advisors
+app.get("/api/v1/advisors", async (req, res) => {
+  try {
+    const results = await query("SELECT * FROM users WHERE role = 'advisor'");
     res.status(201).json({
       data: results.rows,
     });

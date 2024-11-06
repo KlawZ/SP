@@ -1,5 +1,6 @@
 .sidebar {
   width: 250px; /* Set the width of the sidebar */
+  flex-shrink: 0;
   background-color: #f8f9fa; /* Light background color */
   padding: 20px; /* Padding around the content */
   position: fixed; /* Fix the sidebar to the left */
