@@ -261,6 +261,12 @@ app.put("/api/v1/proposals/update", async (req, res) => {
             "ON CONFLICT (users_id, stock_symbol) DO UPDATE SET quantity = stock_users.quantity + $3",
           [proposal.investor_id, proposal.stock_id, proposal.quantity]
         );
+
+        // Deduct amount from user's balance for "buy"
+        await query(
+          "UPDATE users SET balance = balance - $1 WHERE users_id = $2",
+          [amount, proposal.investor_id]
+        );
       } else if (proposal.type === "sell") {
         // Decrease quantity for "sell" type
         const currentQuantityResult = await query(
@@ -287,6 +293,11 @@ app.put("/api/v1/proposals/update", async (req, res) => {
             [proposal.investor_id, proposal.stock_id]
           );
         }
+        // Add amount to user's balance for "sell"
+        await query(
+          "UPDATE users SET balance = balance + $1 WHERE users_id = $2",
+          [amount, proposal.investor_id]
+        );
       }
 
       return res.status(200).json({
@@ -344,6 +355,47 @@ app.get("/api/v1/advisors", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+});
+
+// Get all stock values
+app.get("/api/v1/investor/stocks", async (req, res) => {
+  const { userID } = req.query;
+
+  try {
+    // Step 1: Retrieve the user's portfolio
+    const portfolioResults = await query(
+      "SELECT stock_symbol, quantity FROM stock_users WHERE users_id = $1",
+      [userID]
+    );
+
+    const portfolio = portfolioResults.rows; // Array of stocks with symbol and quantity
+
+    // Step 2: Fetch current price for each stock and calculate value
+    const stockValues = await Promise.all(
+      portfolio.map(async (stock) => {
+        const priceResult = await query(
+          "SELECT current_price FROM stocks WHERE symbol = $1",
+          [stock.stock_symbol]
+        );
+
+        const price = priceResult.rows[0]?.current_price || 0;
+        const value = price * stock.quantity;
+
+        return {
+          symbol: stock.stock_symbol,
+          value: value,
+        };
+      })
+    );
+
+    // Step 3: Send the results
+    res.status(200).json({
+      data: stockValues,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

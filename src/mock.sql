@@ -68,7 +68,13 @@ INSERT INTO public.stock_users (stock_symbol, users_id, quantity) VALUES
 ('MSFT', 18, 30);
 */
 
-SELECT * FROM stocks;
+ALTER TABLE stock_users
+ADD CONSTRAINT unique_user_stock UNIQUE (users_id, stock_symbol);
+
+
+SELECT * FROM users;
+DELETE FROM proposals WHERE proposal_id = '14';
+DELETE FROM users WHERE name = 'Kledis';
 --session table
 /*
 CREATE TABLE session (
@@ -77,4 +83,4 @@ CREATE TABLE session (
     expire         TIMESTAMP(6) NOT NULL         -- Expiration time of the session
 );
 */
-SELECT current_price FROM proposals INNER JOIN stocks ON proposals.stock_id = stocks.symbol WHERE stocks.symbol = 'AAPL';
+SELECT symbol, current_price, time FROM stocks s INNER JOIN stock_users su ON s.symbol = su.stock_symbol WHERE su.users_id = 18;
