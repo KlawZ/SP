@@ -101,13 +101,9 @@ app.post("/api/v1/proposal", async (req, res) => {
 //get all for investor
 app.get("/api/v1/investors/proposals", async (req, res) => {
   try {
-    console.log(req.session.advisor_id);
-    if (!req.session.investor_id) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
     const results = await query(
       "SELECT * FROM proposals WHERE investor_id = $1",
-      [req.session.investor_id]
+      [req.body.investor_id]
     );
     res.status(201).json({
       data: results.rows,
@@ -119,14 +115,11 @@ app.get("/api/v1/investors/proposals", async (req, res) => {
 
 //get all for advisor
 app.get("/api/v1/advisors/proposals", async (req, res) => {
+  const { advisor_id } = req.query;
   try {
-    console.log(req.session.advisor_id);
-    if (!req.session.investor_id) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
     const results = await query(
-      "SELECT * FROM proposals WHERE advisor_id = $1",
-      [req.session.advisor_id]
+      "SELECT * FROM proposals WHERE advisor_id = $1 AND accepted IS NULL",
+      [advisor_id]
     );
     res.status(201).json({
       data: results.rows,
@@ -232,45 +225,82 @@ app.put("/api/v1/posts/vote", async (req, res) => {
   }
 });
 
-//update proposal which then updates the portfolio? and then updates the transaction table
 app.put("/api/v1/proposals/update", async (req, res) => {
-  const { proposal_id, type, symbol, accepted, price } = req.body;
+  const { proposal_id, accepted } = req.body;
 
   try {
+    // Step 1: Update the proposal's accepted status
     const proposalResult = await query(
-      "UPDATE proposal SET accepted = $1 WHERE id = $2 RETURNING *",
+      "UPDATE proposals SET accepted = $1 WHERE proposal_id = $2 RETURNING *",
       [accepted, proposal_id]
     );
-    if (proposalResult.rowCount === 0) {
-      return res.status(404).json({ error: "Proposal not found" });
-    }
+
     if (accepted) {
-      const proposal = proposalResult.rows[0]; // Get the proposal details
+      // Step 2: Retrieve the proposal details, including stock symbol and quantity
+      const proposal = proposalResult.rows[0];
+      const priceResult = await query(
+        "SELECT current_price FROM stocks WHERE symbol = $1",
+        [proposal.stock_id]
+      );
 
-      /*const price = await query(
-        "SELECT current_price FROM proposals INNER JOIN stocks ON proposals.stock_id = stocks.symbol WHERE stocks.symbol = 'AAPL'"
-      );*/
+      // Step 3: Calculate the amount (quantity * current_price)
+      const price = priceResult.rows[0].current_price;
+      const amount = proposal.quantity * price;
 
-      // Insert into the transactions table (assuming it has these columns)
+      // Step 4: Insert the transaction record
       await query(
         "INSERT INTO transactions (proposal_id, amount, type) VALUES ($1, $2, $3)",
-        [proposal.proposal_id, proposal.quantity] // times something
+        [proposal_id, amount, proposal.type]
       );
 
-      await query(
-        "INSERT INTO portfolio (user_id, stock_id, quantity) VALUES ($1, $2, $3) " +
-          "ON CONFLICT (user_id, stock_id) DO UPDATE SET quantity = portfolio.quantity + $3",
-        [proposal.investor_id, proposal.stock_id, proposal.quantity]
-      );
+      // Step 5: Handle "buy" and "sell" types in the stock_users table
+      if (proposal.type === "buy") {
+        // Increase quantity for "buy" type
+        await query(
+          "INSERT INTO stock_users (users_id, stock_symbol, quantity) VALUES ($1, $2, $3) " +
+            "ON CONFLICT (users_id, stock_symbol) DO UPDATE SET quantity = stock_users.quantity + $3",
+          [proposal.investor_id, proposal.stock_id, proposal.quantity]
+        );
+      } else if (proposal.type === "sell") {
+        // Decrease quantity for "sell" type
+        const currentQuantityResult = await query(
+          "SELECT quantity FROM stock_users WHERE users_id = $1 AND stock_symbol = $2",
+          [proposal.investor_id, proposal.stock_id]
+        );
+
+        const currentQuantity = currentQuantityResult.rows[0]?.quantity || 0;
+        console.log(currentQuantity);
+        const newQuantity = currentQuantity - proposal.quantity;
+        console.log(proposal.quantity);
+        console.log(newQuantity);
+
+        if (newQuantity > 0) {
+          // Update the quantity if there's still some stock left
+          await query(
+            "UPDATE stock_users SET quantity = $1 WHERE users_id = $2 AND stock_symbol = $3",
+            [newQuantity, proposal.investor_id, proposal.stock_id]
+          );
+        } else {
+          // Delete the record if the quantity reaches zero or below
+          await query(
+            "DELETE FROM stock_users WHERE users_id = $1 AND stock_symbol = $2",
+            [proposal.investor_id, proposal.stock_id]
+          );
+        }
+      }
+
+      return res.status(200).json({
+        message:
+          "Proposal accepted, transaction recorded, and portfolio updated.",
+      });
     }
 
+    // Response for declined proposal
     res.status(200).json({
-      message: accepted
-        ? "Proposal accepted and transaction recorded."
-        : "Proposal declined.",
+      message: "Proposal declined.",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -280,6 +310,22 @@ app.get("/api/v1/stocks", async (req, res) => {
   try {
     const results = await query(
       "SELECT symbol, current_price, time FROM stocks"
+    );
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get all stocks belonging to a specific investor
+app.get("/api/v1/stocks/investor", async (req, res) => {
+  const { userID } = req.query;
+  try {
+    const results = await query(
+      "SELECT symbol, current_price, time FROM stocks s INNER JOIN stock_users su ON s.symbol = su.stock_symbol WHERE su.users_id = $1",
+      [userID]
     );
     res.status(201).json({
       data: results.rows,

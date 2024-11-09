@@ -26,11 +26,23 @@ const ProposalForm = () => {
       .catch((error) => console.error("Error fetching advisors:", error));
 
     // Fetch stocks using axios
-    axios
-      .get("http://localhost:3000/api/v1/stocks")
-      .then((response) => setStocks(response.data.data))
-      .catch((error) => console.error("Error fetching stocks:", error));
-  }, []);
+    // if sell get only stocks for a certain investor
+    if (formData.type === "sell") {
+      axios
+        .get("http://localhost:3000/api/v1/stocks/investor", {
+          params: { userID },
+        })
+        .then((response) => {
+          setStocks(response.data.data);
+        })
+        .catch((error) => console.error("Error fetching stocks:", error));
+    } else if (formData.type === "buy") {
+      axios
+        .get("http://localhost:3000/api/v1/stocks")
+        .then((response) => setStocks(response.data.data))
+        .catch((error) => console.error("Error fetching stocks:", error));
+    }
+  }, [formData.type, userID]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

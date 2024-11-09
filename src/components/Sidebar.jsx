@@ -4,16 +4,20 @@ import { useStateContext } from "../context/StateContext";
 import "./Sidebar.css";
 
 function Sidebar() {
-  const { username } = useStateContext();
+  const { username, userRole } = useStateContext();
   return (
     <div className="sidebar">
       <h2>Welcome {username}</h2>
       <ul>
-        <li>
-          <NavLink to="/home" activeClassName="active-link">
-            Home
-          </NavLink>
-        </li>
+        {userRole === "investor" && (
+          <>
+            <li>
+              <NavLink to="/home" activeClassName="active-link">
+                Home
+              </NavLink>
+            </li>
+          </>
+        )}
         <li>
           <NavLink to="/posts" activeClassName="active-link">
             Posts
