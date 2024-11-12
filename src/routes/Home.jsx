@@ -32,7 +32,7 @@ const Home = () => {
     <div>
       <Sidebar />
       <div style={{ width: "600px", margin: "auto" }}>
-        <h2>User Balance</h2>
+        <h2>Your Portfolio</h2>
         <PieChart balance={balance} stockValues={stockValues} />
       </div>
     </div>

@@ -171,15 +171,14 @@ app.get("/api/v1/advisors/reviews", async (req, res) => {
 });
 
 //post
-app.post("/api/v1/advisors/:advisor_id/posts", async (req, res) => {
+app.post("/api/v1/advisors/posts", async (req, res) => {
   try {
     const results = await query(
-      "INSERT INTO post (content, advisor_id) VALUES ($1, $2)",
-      [req.body.advisor_id, req.body.content]
+      "INSERT INTO posts (content, advisor_id, upvotes, downvotes) VALUES ($1, $2, $3, $4)",
+      [req.body.content, req.body.advisor_id, 0, 0]
     );
-    req.session.post_id = res.status(201).json({
-      advisor_id: req.body.advisor_id,
-      content: req.body.content,
+    res.status(201).json({
+      data: results.rows,
     });
   } catch (error) {
     console.log(error);
@@ -200,7 +199,8 @@ app.get("/api/v1/investors/posts", async (req, res) => {
 
 //update a post
 app.put("/api/v1/posts/vote", async (req, res) => {
-  const { post_id, voteType } = req.body; // voteType can be 'upvote' or 'downvote'
+  const { post_id, voteType } = req.body;
+  console.log("Received post_id:", post_id, "voteType:", voteType); // voteType can be 'upvote' or 'downvote'
 
   try {
     let queryText;
