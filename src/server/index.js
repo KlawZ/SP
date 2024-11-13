@@ -56,6 +56,58 @@ app.get("/api/v1/users/", async (req, res) => {
   }
 });
 
+// get all users
+app.get("/api/v1/admin/users", async (req, res) => {
+  try {
+    const results = await query("SELECT * FROM users");
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// get all posts
+app.get("/api/v1/admin/posts", async (req, res) => {
+  try {
+    const results = await query("SELECT * FROM posts");
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// delete a post
+app.delete("/api/v1/admin/posts", async (req, res) => {
+  try {
+    const results = await query("DELETE FROM posts WHERE post_id = $1", [
+      req.query.post_id,
+    ]);
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// delete a user
+app.delete("/api/v1/admin/users", async (req, res) => {
+  try {
+    const results = await query("DELETE FROM users WHERE users_id = $1", [
+      req.query.users_id,
+    ]);
+    res.status(201).json({
+      data: results.rows,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+/*
 //get all advisors
 app.get("/api/v1/advisors", async (req, res) => {
   try {
@@ -63,7 +115,7 @@ app.get("/api/v1/advisors", async (req, res) => {
     const results = await query(
       "SELECT users_id, name FROM users WHERE role = $1",
       [role]
-    ); // Adjust query based on your database structure
+    );
     res.status(200).json({
       data: results.rows,
     });
@@ -73,7 +125,7 @@ app.get("/api/v1/advisors", async (req, res) => {
       .status(500)
       .json({ error: "An error occurred while retrieving advisors." });
   }
-});
+});*/
 
 //proposal
 //create
@@ -130,10 +182,10 @@ app.get("/api/v1/advisors/proposals", async (req, res) => {
 });
 
 //review
-app.post("/api/v1/advisors/:advisor_id/reviews", async (req, res) => {
+app.post("/api/v1/investors/reviews", async (req, res) => {
   try {
     const results = await query(
-      "INSERT INTO review (investor_id, advisor_id, rating, feedback) VALUES ($1, $2, $3, $4)",
+      "INSERT INTO reviews (investor_id, advisor_id, rating, feedback) VALUES ($1, $2, $3, $4)",
       [
         req.body.investor_id,
         req.body.advisor_id,
@@ -142,10 +194,7 @@ app.post("/api/v1/advisors/:advisor_id/reviews", async (req, res) => {
       ]
     );
     res.status(201).json({
-      investor_id: req.body.investor_id,
-      advisor_id: req.body.advisor_id,
-      rating: req.body.rating,
-      feedback: req.body.feedback,
+      data: results.rows,
     });
   } catch (error) {
     console.log(error);
@@ -154,13 +203,10 @@ app.post("/api/v1/advisors/:advisor_id/reviews", async (req, res) => {
 
 //get all
 app.get("/api/v1/advisors/reviews", async (req, res) => {
+  const { advisor_id } = req.query;
   try {
-    console.log(req.session.advisor_id);
-    if (!req.session.advisor_id) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
     const results = await query("SELECT * FROM reviews WHERE advisor_id = $1", [
-      req.session.advisor_id,
+      advisor_id,
     ]);
     res.status(201).json({
       data: results.rows,

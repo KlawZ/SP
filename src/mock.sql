@@ -71,8 +71,10 @@ INSERT INTO public.stock_users (stock_symbol, users_id, quantity) VALUES
 ALTER TABLE stock_users
 ADD CONSTRAINT unique_user_stock UNIQUE (users_id, stock_symbol);
 
-
-SELECT * FROM users;
+UPDATE stock_users SET quantity = 10 WHERE stock_symbol = 'AAPL';
+SELECT * FROM posts;
+SELECT * FROM reviews;
+DELETE FROM stock_users WHERE users_id = 18;
 DELETE FROM proposals WHERE proposal_id = '14';
 DELETE FROM users WHERE name = 'Kledis';
 --session table
@@ -83,4 +85,4 @@ CREATE TABLE session (
     expire         TIMESTAMP(6) NOT NULL         -- Expiration time of the session
 );
 */
-SELECT symbol, current_price, time FROM stocks s INNER JOIN stock_users su ON s.symbol = su.stock_symbol WHERE su.users_id = 18;
+SELECT stock_symbol, quantity FROM stock_users WHERE users_id = 18;

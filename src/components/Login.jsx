@@ -35,6 +35,12 @@ function Login({ onLogin }) {
           response.data.data.role,
           response.data.data.balance
         );
+        if (
+          role === "administrator" &&
+          localStorage.getItem("marketState") === null
+        ) {
+          localStorage.setItem("marketState", "true"); // Default to open
+        }
         onLogin();
       } catch (error) {
         if (error.response && error.response.status === 401) {

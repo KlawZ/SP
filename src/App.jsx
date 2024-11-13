@@ -11,6 +11,7 @@ import Posts from "./routes/Posts";
 import Proposals from "./routes/Proposals";
 import Reviews from "./routes/Reviews";
 import Stocks from "./routes/Stocks";
+import AdminDashboard from "./routes/AdminDashboard";
 import { useStateContext } from "./context/StateContext";
 
 function App() {
@@ -23,7 +24,9 @@ function App() {
           path="/"
           element={
             isLoggedIn ? (
-              userRole === "advisor" ? (
+              userRole === "administrator" ? (
+                <Navigate to="/admin" />
+              ) : userRole === "advisor" ? (
                 <Navigate to="/stocks" />
               ) : (
                 <Navigate to="/home" />
@@ -38,6 +41,7 @@ function App() {
         <Route path="/proposals" element={<Proposals />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/stocks" element={<Stocks />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<Navigate to="/" />} />{" "}
       </Routes>
     </Router>
