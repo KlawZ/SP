@@ -23,7 +23,7 @@ function App() {
         <Route
           path="/"
           element={
-            isLoggedIn ? (
+            isLoggedIn && userRole ? (
               userRole === "administrator" ? (
                 <Navigate to="/admin" />
               ) : userRole === "advisor" ? (

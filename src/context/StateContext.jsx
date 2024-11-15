@@ -34,6 +34,7 @@ export const StateProvider = ({ children }) => {
         userID,
         username,
         userRole,
+        setUserRole,
         balance,
         setUserData,
         stocks,

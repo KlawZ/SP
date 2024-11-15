@@ -1,10 +1,18 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Button } from "react-bootstrap";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useStateContext } from "../context/StateContext";
 import "./Sidebar.css";
 
 function Sidebar() {
-  const { username, userRole } = useStateContext();
+  const { username, userRole, setUserRole } = useStateContext();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setUserRole("");
+    navigate("/");
+  };
+
   return (
     <div className="sidebar">
       <h2>Welcome {username}</h2>
@@ -39,6 +47,9 @@ function Sidebar() {
           </NavLink>
         </li>
       </ul>
+      <Button variant="danger" onClick={handleLogout} className="mt-3">
+        Logout
+      </Button>
     </div>
   );
 }
