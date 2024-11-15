@@ -80,33 +80,41 @@ app.get("/api/v1/admin/posts", async (req, res) => {
   }
 });
 
-// delete a post
-app.delete("/api/v1/admin/posts", async (req, res) => {
+//delete a user
+app.delete("/api/v1/admin/users", async (req, res) => {
   try {
-    const results = await query("DELETE FROM posts WHERE post_id = $1", [
-      req.query.post_id,
-    ]);
-    res.status(201).json({
-      data: results.rows,
-    });
+    await query(
+      `
+      WITH deleted_transactions AS (
+        DELETE FROM transactions WHERE proposal_id IN (SELECT proposal_id FROM proposals WHERE investor_id = $1 or advisor_id = $1)
+      ), 
+      deleted_stock_users AS (
+        DELETE FROM stock_users WHERE users_id = $1
+      ),
+      deleted_reviews AS (
+        DELETE FROM reviews WHERE advisor_id = $1 OR investor_id = $1
+      ),
+      deleted_posts AS (
+        DELETE FROM posts WHERE advisor_id = $1
+      ),
+      deleted_proposals AS (
+        DELETE FROM proposals WHERE advisor_id = $1 OR investor_id = $1
+      )
+      DELETE FROM users WHERE users_id = $1;
+      `,
+      [req.query.users_id]
+    );
+
+    res.status(204).json({ status: "success" });
   } catch (error) {
-    console.log(error);
+    console.error("Error deleting user and related data:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete user and related data",
+    });
   }
 });
 
-// delete a user
-app.delete("/api/v1/admin/users", async (req, res) => {
-  try {
-    const results = await query("DELETE FROM users WHERE users_id = $1", [
-      req.query.users_id,
-    ]);
-    res.status(201).json({
-      data: results.rows,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
 /*
 //get all advisors
 app.get("/api/v1/advisors", async (req, res) => {
