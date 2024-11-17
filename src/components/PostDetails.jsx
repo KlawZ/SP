@@ -25,9 +25,16 @@ const PostDetails = ({ post }) => {
   };
 
   return (
-    <Card style={{ marginBottom: "1rem" }}>
+    <Card
+      style={{
+        width: "80%",
+        backgroundColor: "lightblue",
+        marginTop: "5px",
+        marginLeft: "2%",
+      }}
+    >
       <Card.Body>
-        <Card.Title>Advisor: {post.advisorName}</Card.Title>
+        <Card.Title>Advisor: {post.advisor_id}</Card.Title>
         <Card.Text>{post.content}</Card.Text>
 
         <div>

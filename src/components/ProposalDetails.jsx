@@ -21,8 +21,16 @@ function ProposalDetails({ proposal }) {
 
   return (
     <Container style={{ maxWidth: "400px" }}>
-      <Card style={{ padding: "20px", maxHeight: "400px", overflowY: "auto" }}>
-        <Card.Header as="h2">Proposal Details</Card.Header>
+      <Card
+        style={{
+          padding: "20px",
+          maxHeight: "400px",
+          overflowY: "auto",
+        }}
+      >
+        <Card.Header as="h2" style={{ backgroundColor: "lightblue" }}>
+          Proposal Details
+        </Card.Header>
         <Card.Body>
           <Card.Text>
             <strong>Content:</strong> {proposal.content}

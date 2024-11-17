@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import bcrypt from "bcrypt";
 import { query } from "../db/index.js";
 
 const app = express();
@@ -11,48 +12,61 @@ app.use(express.json());
 //create user
 app.post("/api/v1/users", async (req, res) => {
   try {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds); // Hash the password
+
     let results;
     if (req.body.role === "investor") {
       results = await query(
         "INSERT INTO users (name, password, role, balance) VALUES ($1, $2, $3, $4) RETURNING *",
-        [req.body.name, req.body.password, req.body.role, 10000]
+        [req.body.name, hashedPassword, req.body.role, 10000]
       );
     } else {
       results = await query(
         "INSERT INTO users (name, password, role) VALUES ($1, $2, $3) RETURNING *",
-        [req.body.name, req.body.password, req.body.role]
+        [req.body.name, hashedPassword, req.body.role]
       );
     }
+
     console.log(results.rows[0]);
     res.status(201).json({
       username: req.body.name,
-      password: req.body.password,
       role: req.body.role,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-//get user
 app.get("/api/v1/users/", async (req, res) => {
   const { name, password } = req.query;
 
   try {
-    const userResult = await query(
-      "SELECT * FROM users WHERE name = $1 AND password = $2",
-      [name, password]
-    );
+    const userResult = await query("SELECT * FROM users WHERE name = $1", [
+      name,
+    ]);
+
     if (userResult.rows.length === 0) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
     const user = userResult.rows[0];
-    console.log("running");
-    res.status(201).json({
+
+    // Compare the hashed password with the provided password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    console.log("Login successful");
+    res.status(200).json({
       data: user,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

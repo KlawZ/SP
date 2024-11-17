@@ -68,7 +68,7 @@ function Login({ onLogin }) {
     <div className="login-wrapper">
       <div className="intro">
         <h1>Welcome to TradeLearn</h1>
-        <h2>Youre here to trade, were here to learn!</h2>
+        <h2>You're here to trade, we're here to make it simple!</h2>
         <Button
           className="btn-custom register-btn"
           onClick={() => setFormType("register")}
@@ -115,7 +115,7 @@ function Login({ onLogin }) {
       {formType === "register" && (
         <div className="login-form-container">
           <h2 className="login-title">Register</h2>
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit} className="form-login">
             <Form.Group className="login-form">
               <Form.Select value={role} onChange={updateRole}>
                 <option value="investor">Investor</option>

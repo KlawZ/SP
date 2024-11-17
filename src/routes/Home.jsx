@@ -29,10 +29,16 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
+    <div style={{ display: "flex", height: "100vh" }}>
       <Sidebar />
-      <div style={{ width: "600px", margin: "auto" }}>
-        <h2>Your Portfolio</h2>
+      <div
+        style={{
+          flexGrow: "1",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <PieChart balance={balance} stockValues={stockValues} />
       </div>
     </div>

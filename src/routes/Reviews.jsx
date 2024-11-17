@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Alert } from "react-bootstrap";
 import Sidebar from "../components/Sidebar";
 import { useStateContext } from "../context/StateContext";
 import ReviewForm from "../components/ReviewForm";
@@ -39,10 +40,34 @@ const Reviews = () => {
         </div>
       )}
       {userRole === "advisor" && (
-        <div style={{ marginLeft: "250px", flexGrow: 1 }}>
-          {reviews.map((review) => (
-            <ReviewDetails key={review.review_id} review={review} />
-          ))}
+        <div style={{ display: "flex", marginLeft: "20%", flexWrap: "wrap" }}>
+          {reviews.length === 0 ? (
+            <div
+              style={{
+                position: "relative",
+                marginLeft: "450px",
+                height: "100vh",
+              }}
+            >
+              <Alert
+                variant="warning"
+                style={{
+                  maxHeight: "100px",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  maxWidth: "300px",
+                  textAlign: "center",
+                }}
+              >
+                No reviews available.
+              </Alert>
+            </div>
+          ) : (
+            reviews.map((review) => (
+              <ReviewDetails key={review.review_id} review={review} />
+            ))
+          )}
         </div>
       )}
     </div>

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public."users"
     name text NOT NULL,
     password text NOT NULL,
     role text NOT NULL,
-    balance integer,
+    balance double precision,
     PRIMARY KEY (users_id)
 );
 
@@ -131,6 +131,8 @@ ALTER TABLE IF EXISTS public.stock_users
     ON DELETE NO ACTION
     NOT VALID;
 
+ALTER TABLE stock_users
+ADD CONSTRAINT unique_user_stock UNIQUE (users_id, stock_symbol);
 
 ALTER TABLE IF EXISTS public.reviews
     ADD FOREIGN KEY (investor_id)

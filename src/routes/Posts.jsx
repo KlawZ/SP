@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Alert } from "react-bootstrap";
 import axios from "axios";
 import PostForm from "../components/PostForm";
 import PostDetails from "../components/PostDetails";
@@ -37,10 +38,32 @@ const Posts = () => {
         </div>
       )}
       {userRole === "investor" && (
-        <div style={{ marginLeft: "250px", flexGrow: 1 }}>
-          {posts.map((post) => (
-            <PostDetails key={post.post_id} post={post} />
-          ))}
+        <div style={{ display: "flex", flexWrap: "wrap", marginLeft: "250px" }}>
+          {posts.length === 0 ? (
+            <div
+              style={{
+                position: "relative",
+                marginLeft: "450px",
+                height: "100vh",
+              }}
+            >
+              <Alert
+                variant="warning"
+                style={{
+                  maxHeight: "100px",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  maxWidth: "300px",
+                  textAlign: "center",
+                }}
+              >
+                No posts available.
+              </Alert>
+            </div>
+          ) : (
+            posts.map((post) => <PostDetails key={post.post_id} post={post} />)
+          )}
         </div>
       )}
     </div>

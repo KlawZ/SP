@@ -29,7 +29,19 @@ const PieChart = ({ balance, stockValues }) => {
     ],
   };
 
-  return <Pie data={data} />;
+  const options = {
+    plugins: {
+      title: {
+        display: true,
+        text: "Your Portfolio Distribution",
+        font: {
+          size: 18, // Adjust the size as needed
+        },
+      },
+    },
+  };
+
+  return <Pie data={data} options={options} />;
 };
 
 export default PieChart;

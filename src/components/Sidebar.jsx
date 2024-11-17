@@ -1,17 +1,11 @@
 import React from "react";
-import { Button } from "react-bootstrap";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useStateContext } from "../context/StateContext";
 import "./Sidebar.css";
+import LogoutButton from "./LogoutButton";
 
 function Sidebar() {
-  const { username, userRole, setUserRole } = useStateContext();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    setUserRole("");
-    navigate("/");
-  };
+  const { username, userRole } = useStateContext();
 
   return (
     <div className="sidebar">
@@ -20,36 +14,24 @@ function Sidebar() {
         {userRole === "investor" && (
           <>
             <li>
-              <NavLink to="/home" activeClassName="active-link">
-                Home
-              </NavLink>
+              <NavLink to="/home">Home</NavLink>
             </li>
           </>
         )}
         <li>
-          <NavLink to="/posts" activeClassName="active-link">
-            Posts
-          </NavLink>
+          <NavLink to="/stocks">Stocks</NavLink>
         </li>
         <li>
-          <NavLink to="/proposals" activeClassName="active-link">
-            Proposals
-          </NavLink>
+          <NavLink to="/proposals">Proposals</NavLink>
         </li>
         <li>
-          <NavLink to="/reviews" activeClassName="active-link">
-            Reviews
-          </NavLink>
+          <NavLink to="/posts">Posts</NavLink>
         </li>
         <li>
-          <NavLink to="/stocks" activeClassName="active-link">
-            Stocks
-          </NavLink>
+          <NavLink to="/reviews">Reviews</NavLink>
         </li>
       </ul>
-      <Button variant="danger" onClick={handleLogout} className="mt-3">
-        Logout
-      </Button>
+      <LogoutButton className="logout-button" />
     </div>
   );
 }
