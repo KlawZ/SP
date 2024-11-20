@@ -11,7 +11,7 @@ const Stocks = () => {
   const fetchStocks = async () => {
     try {
       const response = await axios.get("http://localhost:3000/api/v1/stocks");
-      if (response.status === 201) {
+      if (response.status === 200) {
         setStockData(response.data.data); // Updates the stocks in context
       } else {
         console.error("Unexpected response status:", response.status);

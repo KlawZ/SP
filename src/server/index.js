@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import { query } from "../db/index.js";
@@ -74,7 +74,7 @@ app.get("/api/v1/users/", async (req, res) => {
 app.get("/api/v1/admin/users", async (req, res) => {
   try {
     const results = await query("SELECT * FROM users");
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -86,7 +86,7 @@ app.get("/api/v1/admin/users", async (req, res) => {
 app.get("/api/v1/admin/posts", async (req, res) => {
   try {
     const results = await query("SELECT * FROM posts");
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -129,26 +129,6 @@ app.delete("/api/v1/admin/users", async (req, res) => {
   }
 });
 
-/*
-//get all advisors
-app.get("/api/v1/advisors", async (req, res) => {
-  try {
-    const role = "advisor";
-    const results = await query(
-      "SELECT users_id, name FROM users WHERE role = $1",
-      [role]
-    );
-    res.status(200).json({
-      data: results.rows,
-    });
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while retrieving advisors." });
-  }
-});*/
-
 //proposal
 //create
 app.post("/api/v1/proposal", async (req, res) => {
@@ -179,7 +159,7 @@ app.get("/api/v1/investors/proposals", async (req, res) => {
       "SELECT * FROM proposals WHERE investor_id = $1",
       [req.body.investor_id]
     );
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -195,7 +175,7 @@ app.get("/api/v1/advisors/proposals", async (req, res) => {
       "SELECT * FROM proposals WHERE advisor_id = $1 AND accepted IS NULL",
       [advisor_id]
     );
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -230,7 +210,7 @@ app.get("/api/v1/advisors/reviews", async (req, res) => {
     const results = await query("SELECT * FROM reviews WHERE advisor_id = $1", [
       advisor_id,
     ]);
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -257,7 +237,7 @@ app.post("/api/v1/advisors/posts", async (req, res) => {
 app.get("/api/v1/investors/posts", async (req, res) => {
   try {
     const results = await query("SELECT * FROM posts");
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -268,7 +248,6 @@ app.get("/api/v1/investors/posts", async (req, res) => {
 //update a post
 app.put("/api/v1/posts/vote", async (req, res) => {
   const { post_id, voteType } = req.body;
-  console.log("Received post_id:", post_id, "voteType:", voteType); // voteType can be 'upvote' or 'downvote'
 
   try {
     let queryText;
@@ -287,12 +266,13 @@ app.put("/api/v1/posts/vote", async (req, res) => {
     res.status(200).json({
       data: result.rows[0],
     });
+    console.log(response);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+//update proposals
 app.put("/api/v1/proposals/update", async (req, res) => {
   const { proposal_id, accepted } = req.body;
 
@@ -390,7 +370,7 @@ app.get("/api/v1/stocks", async (req, res) => {
     const results = await query(
       "SELECT symbol, current_price, time FROM stocks"
     );
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -406,7 +386,7 @@ app.get("/api/v1/stocks/investor", async (req, res) => {
       "SELECT symbol, current_price, time FROM stocks s INNER JOIN stock_users su ON s.symbol = su.stock_symbol WHERE su.users_id = $1",
       [userID]
     );
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -418,7 +398,7 @@ app.get("/api/v1/stocks/investor", async (req, res) => {
 app.get("/api/v1/advisors", async (req, res) => {
   try {
     const results = await query("SELECT * FROM users WHERE role = 'advisor'");
-    res.status(201).json({
+    res.status(200).json({
       data: results.rows,
     });
   } catch (error) {
@@ -467,6 +447,10 @@ app.get("/api/v1/investor/stocks", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is up and listening on port ${port} `);
-});
+export default app;
+
+if (process.argv[1].endsWith("index.js")) {
+  app.listen(port, () => {
+    console.log(`Server is up and listening on port ${port} `);
+  });
+}
