@@ -1,4 +1,5 @@
 import express, { response } from "express";
+import { startDataInsertion } from "./data_insertion.js";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import { query } from "../db/index.js";
@@ -450,6 +451,7 @@ app.get("/api/v1/investor/stocks", async (req, res) => {
 export default app;
 
 if (process.argv[1].endsWith("index.js")) {
+  startDataInsertion();
   app.listen(port, () => {
     console.log(`Server is up and listening on port ${port} `);
   });

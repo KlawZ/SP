@@ -24,7 +24,7 @@ const Stocks = () => {
   useEffect(() => {
     fetchStocks(); // Initial fetch
 
-    const interval = setInterval(fetchStocks, 60000); // Fetch every minute
+    const interval = setInterval(fetchStocks, 30000); // Fetch every minute
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []); // No dependencies so it only runs once on mount
   return (

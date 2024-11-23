@@ -18,12 +18,14 @@ async function updatePrice(symbol) {
   });
 }
 
-function updateAll() {
+export function startDataInsertion() {
   const stockSymbols = ["AAPL", "GOOGL", "AMZN", "TSLA", "MSFT"];
 
-  stockSymbols.forEach((symbol) => {
-    updatePrice(symbol);
-  });
-}
+  function updateAll() {
+    stockSymbols.forEach((symbol) => {
+      updatePrice(symbol);
+    });
+  }
 
-setInterval(updateAll, 10000);
+  setInterval(updateAll, 10000);
+}

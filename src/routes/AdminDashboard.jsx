@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Container } from "react-bootstrap";
+import LogoutButton from "../components/LogoutButton";
 import axios from "axios";
 
 const AdminDashboard = () => {
@@ -46,7 +47,11 @@ const AdminDashboard = () => {
 
   return (
     <Container
-      style={{ display: "grid", maxWidth: "800px", marginTop: "20px" }}
+      style={{
+        display: "grid",
+        maxWidth: "800px",
+        rowGap: "30px",
+      }}
     >
       <h1 className="text-center">Admin Dashboard</h1>
 
@@ -101,6 +106,7 @@ const AdminDashboard = () => {
           {market ? "Open Market" : "Close Market"}
         </Button>
       </div>
+      <LogoutButton />
     </Container>
   );
 };
