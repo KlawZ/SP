@@ -19,7 +19,7 @@ const Reviews = () => {
         }
       );
       console.log(response.data.data);
-      setReviews(response.data.data); // Assumes response data structure
+      setReviews(response.data.data);
     } catch (error) {
       console.error("Error fetching reviews:", error);
     }

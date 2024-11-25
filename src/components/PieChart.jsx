@@ -35,7 +35,7 @@ const PieChart = ({ balance, stockValues }) => {
         display: true,
         text: "Your Portfolio Distribution",
         font: {
-          size: 18, // Adjust the size as needed
+          size: 18,
         },
       },
     },

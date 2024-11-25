@@ -40,7 +40,7 @@ function Login({ onLogin }) {
           role === "administrator" &&
           localStorage.getItem("marketState") === null
         ) {
-          localStorage.setItem("marketState", "true"); // Default to open
+          localStorage.setItem("marketState", "true");
         }
         onLogin();
       } catch (error) {

@@ -9,12 +9,11 @@ const AdminDashboard = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
-    // Fetch all users and posts
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
           "http://localhost:3000/api/v1/admin/users"
-        ); // Adjust route as needed
+        );
         setUsers(response.data.data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -29,7 +28,7 @@ const AdminDashboard = () => {
       await axios.delete("http://localhost:3000/api/v1/admin/users", {
         params: { users_id: userId },
       });
-      setUsers(users.filter((user) => user.users_id !== userId)); // Remove user from state
+      setUsers(users.filter((user) => user.users_id !== userId));
     } catch (error) {
       console.error("Error deleting user:", error);
     }

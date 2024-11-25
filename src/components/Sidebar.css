@@ -1,45 +1,45 @@
 .sidebar {
-  width: 18%; /* Set the width of the sidebar */
+  width: 18%;
   flex-shrink: 0;
-  background-color: lightblue; /* Light background color */
-  padding: 20px; /* Padding around the content */
-  position: fixed; /* Fix the sidebar to the left */
-  height: 100%; /* Full height */
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
-  overflow-y: auto; /* Allow vertical scrolling if content overflows */
+  background-color: lightblue;
+  padding: 20px;
+  position: fixed;
+  height: 100%;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
 }
 
 .sidebar h2 {
   font-family: "Merriweather", serif;
   font-weight: bold;
-  margin-bottom: 20px; /* Space below the heading */
-  font-size: 2rem; /* Font size for the heading */
+  margin-bottom: 20px;
+  font-size: 2rem;
 }
 
 .sidebar ul {
-  list-style-type: none; /* Remove bullet points */
-  padding: 0; /* Remove padding */
+  list-style-type: none;
+  padding: 0;
 }
 
 .sidebar li {
-  margin: 10px 0; /* Space between list items */
+  margin: 10px 0;
 }
 
 .sidebar a {
-  text-decoration: none; /* Remove underline from links */
-  color: #333; /* Dark text color */
-  padding: 10px; /* Padding around the link */
-  display: block; /* Make the link take up the full width */
-  border-radius: 4px; /* Rounded corners */
-  transition: background-color 0.3s; /* Smooth transition for background color */
+  text-decoration: none;
+  color: #333;
+  padding: 10px;
+  display: block;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .sidebar a:hover {
-  background-color: #e2e6ea; /* Change background on hover */
+  background-color: #e2e6ea;
 }
 
 .sidebar .logout-button {
   position: absolute;
-  bottom: 10px; /* Adjust spacing from the bottom */
-  width: 80%; /* Optional: make button full width */
+  bottom: 10px;
+  width: 80%;
 }

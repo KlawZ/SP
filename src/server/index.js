@@ -14,7 +14,7 @@ app.use(express.json());
 app.post("/api/v1/users", async (req, res) => {
   try {
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds); // Hash the password
+    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
 
     let results;
     if (req.body.role === "investor") {
@@ -39,7 +39,7 @@ app.post("/api/v1/users", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
+//get user
 app.get("/api/v1/users/", async (req, res) => {
   const { name, password } = req.query;
 
@@ -54,7 +54,6 @@ app.get("/api/v1/users/", async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // Compare the hashed password with the provided password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -130,8 +129,7 @@ app.delete("/api/v1/admin/users", async (req, res) => {
   }
 });
 
-//proposal
-//create
+//create proposal
 app.post("/api/v1/proposal", async (req, res) => {
   try {
     const results = await query(
@@ -184,7 +182,7 @@ app.get("/api/v1/advisors/proposals", async (req, res) => {
   }
 });
 
-//review
+//create review
 app.post("/api/v1/investors/reviews", async (req, res) => {
   try {
     const results = await query(
@@ -204,7 +202,7 @@ app.post("/api/v1/investors/reviews", async (req, res) => {
   }
 });
 
-//get all
+//get all for advisor
 app.get("/api/v1/advisors/reviews", async (req, res) => {
   const { advisor_id } = req.query;
   try {
@@ -219,7 +217,7 @@ app.get("/api/v1/advisors/reviews", async (req, res) => {
   }
 });
 
-//post
+//create post
 app.post("/api/v1/advisors/posts", async (req, res) => {
   try {
     const results = await query(
@@ -278,46 +276,38 @@ app.put("/api/v1/proposals/update", async (req, res) => {
   const { proposal_id, accepted } = req.body;
 
   try {
-    // Step 1: Update the proposal's accepted status
     const proposalResult = await query(
       "UPDATE proposals SET accepted = $1 WHERE proposal_id = $2 RETURNING *",
       [accepted, proposal_id]
     );
 
     if (accepted) {
-      // Step 2: Retrieve the proposal details, including stock symbol and quantity
       const proposal = proposalResult.rows[0];
       const priceResult = await query(
         "SELECT current_price FROM stocks WHERE symbol = $1",
         [proposal.stock_id]
       );
 
-      // Step 3: Calculate the amount (quantity * current_price)
       const price = priceResult.rows[0].current_price;
       const amount = proposal.quantity * price;
 
-      // Step 4: Insert the transaction record
       await query(
         "INSERT INTO transactions (proposal_id, amount, type) VALUES ($1, $2, $3)",
         [proposal_id, amount, proposal.type]
       );
 
-      // Step 5: Handle "buy" and "sell" types in the stock_users table
       if (proposal.type === "buy") {
-        // Increase quantity for "buy" type
         await query(
           "INSERT INTO stock_users (users_id, stock_symbol, quantity) VALUES ($1, $2, $3) " +
             "ON CONFLICT (users_id, stock_symbol) DO UPDATE SET quantity = stock_users.quantity + $3",
           [proposal.investor_id, proposal.stock_id, proposal.quantity]
         );
 
-        // Deduct amount from user's balance for "buy"
         await query(
           "UPDATE users SET balance = balance - $1 WHERE users_id = $2",
           [amount, proposal.investor_id]
         );
       } else if (proposal.type === "sell") {
-        // Decrease quantity for "sell" type
         const currentQuantityResult = await query(
           "SELECT quantity FROM stock_users WHERE users_id = $1 AND stock_symbol = $2",
           [proposal.investor_id, proposal.stock_id]
@@ -330,19 +320,16 @@ app.put("/api/v1/proposals/update", async (req, res) => {
         console.log(newQuantity);
 
         if (newQuantity > 0) {
-          // Update the quantity if there's still some stock left
           await query(
             "UPDATE stock_users SET quantity = $1 WHERE users_id = $2 AND stock_symbol = $3",
             [newQuantity, proposal.investor_id, proposal.stock_id]
           );
         } else {
-          // Delete the record if the quantity reaches zero or below
           await query(
             "DELETE FROM stock_users WHERE users_id = $1 AND stock_symbol = $2",
             [proposal.investor_id, proposal.stock_id]
           );
         }
-        // Add amount to user's balance for "sell"
         await query(
           "UPDATE users SET balance = balance + $1 WHERE users_id = $2",
           [amount, proposal.investor_id]
@@ -355,7 +342,6 @@ app.put("/api/v1/proposals/update", async (req, res) => {
       });
     }
 
-    // Response for declined proposal
     res.status(200).json({
       message: "Proposal declined.",
     });
@@ -412,15 +398,13 @@ app.get("/api/v1/investor/stocks", async (req, res) => {
   const { userID } = req.query;
 
   try {
-    // Step 1: Retrieve the user's portfolio
     const portfolioResults = await query(
       "SELECT stock_symbol, quantity FROM stock_users WHERE users_id = $1",
       [userID]
     );
 
-    const portfolio = portfolioResults.rows; // Array of stocks with symbol and quantity
+    const portfolio = portfolioResults.rows;
 
-    // Step 2: Fetch current price for each stock and calculate value
     const stockValues = await Promise.all(
       portfolio.map(async (stock) => {
         const priceResult = await query(
@@ -438,7 +422,6 @@ app.get("/api/v1/investor/stocks", async (req, res) => {
       })
     );
 
-    // Step 3: Send the results
     res.status(200).json({
       data: stockValues,
     });

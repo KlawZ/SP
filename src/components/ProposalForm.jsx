@@ -19,14 +19,11 @@ const ProposalForm = () => {
   const [stocks, setStocks] = useState([]);
   const [message, setMessage] = useState("");
   useEffect(() => {
-    // Fetch advisors using axios
     axios
       .get("http://localhost:3000/api/v1/advisors")
       .then((response) => setAdvisors(response.data.data))
       .catch((error) => console.error("Error fetching advisors:", error));
 
-    // Fetch stocks using axios
-    // if sell get only stocks for a certain investor
     if (formData.type === "sell") {
       axios
         .get("http://localhost:3000/api/v1/stocks/investor", {
@@ -53,7 +50,6 @@ const ProposalForm = () => {
     e.preventDefault();
     console.log(formData);
     try {
-      // Send formData to the backend
       const response = await axios.post(
         "http://localhost:3000/api/v1/proposal",
         {

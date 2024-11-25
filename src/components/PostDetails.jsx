@@ -6,7 +6,6 @@ const PostDetails = ({ post }) => {
   const [upvotes, setUpvotes] = useState(post.upvotes);
   const [downvotes, setDownvotes] = useState(post.downvotes);
 
-  // Function to handle voting
   const handleVote = async (voteType) => {
     try {
       await axios.put("http://localhost:3000/api/v1/posts/vote", {

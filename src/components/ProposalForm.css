@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  justify-content: center; /* Center the form horizontally */
+  justify-content: center;
   padding: 20px;
   flex-grow: 1;
 }

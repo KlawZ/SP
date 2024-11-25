@@ -18,7 +18,7 @@ const ReviewForm = () => {
         const response = await axios.get(
           "http://localhost:3000/api/v1/advisors"
         );
-        setAdvisors(response.data.data); // Assuming data structure matches
+        setAdvisors(response.data.data);
       } catch (error) {
         console.error("Error fetching advisors:", error);
       }
@@ -40,13 +40,13 @@ const ReviewForm = () => {
       const response = await axios.post(
         "http://localhost:3000/api/v1/investors/reviews",
         {
-          investor_id: userID, // replace with actual investor ID if available
+          investor_id: userID,
           advisor_id: formData.advisor,
           rating: formData.rating,
           feedback: formData.feedback,
         }
       );
-      console.log(response.data); // Handle response data as needed
+      console.log(response.data);
     } catch (error) {
       console.error("Error submitting review:", error);
     }

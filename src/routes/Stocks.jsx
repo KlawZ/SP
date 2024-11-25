@@ -7,12 +7,11 @@ import { useStateContext } from "../context/StateContext";
 const Stocks = () => {
   const { stocks, setStockData } = useStateContext();
 
-  // Function to fetch stock data from the API
   const fetchStocks = async () => {
     try {
       const response = await axios.get("http://localhost:3000/api/v1/stocks");
       if (response.status === 200) {
-        setStockData(response.data.data); // Updates the stocks in context
+        setStockData(response.data.data);
       } else {
         console.error("Unexpected response status:", response.status);
       }
@@ -22,11 +21,11 @@ const Stocks = () => {
   };
 
   useEffect(() => {
-    fetchStocks(); // Initial fetch
+    fetchStocks();
 
-    const interval = setInterval(fetchStocks, 30000); // Fetch every minute
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []); // No dependencies so it only runs once on mount
+    const interval = setInterval(fetchStocks, 30000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div>
       <Sidebar />
@@ -35,9 +34,9 @@ const Stocks = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "20px", // Adjust to add space above the first chart
-          paddingBottom: "20px", // Adds space below the last chart
-          gap: "20px", // Adds space between each chart
+          paddingTop: "20px",
+          paddingBottom: "20px",
+          gap: "20px",
         }}
       >
         {stocks.map((stock) => (

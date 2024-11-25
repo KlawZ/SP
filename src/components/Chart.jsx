@@ -27,19 +27,18 @@ const TimeSeriesChart = ({ stockData }) => {
 
   const [dataPoints, setDataPoints] = useState([]);
 
-  // Update data points when new stock data arrives
   useEffect(() => {
     setDataPoints((prevDataPoints) => [
       ...prevDataPoints,
       { x: time, y: current_price },
     ]);
-  }, [time, current_price]); // Depend on time and price to update on new data
+  }, [time, current_price]);
 
   const chartData = {
     datasets: [
       {
         label: `Stock Data for ${symbol}`,
-        data: dataPoints, // Use accumulated data points
+        data: dataPoints,
         borderColor: "rgba(75, 192, 192, 1)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         fill: true,

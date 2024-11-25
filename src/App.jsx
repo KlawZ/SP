@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,6 +17,14 @@ import { useStateContext } from "./context/StateContext";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { userRole } = useStateContext();
+  useEffect(() => {
+    if (userRole === "administrator") {
+      document.body.style.backgroundColor = "lightblue";
+    }
+    return () => {
+      document.body.style.backgroundColor = "";
+    };
+  }, [userRole]);
   return (
     <Router>
       <Routes>

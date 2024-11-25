@@ -8,9 +8,9 @@ function LogoutButton() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setUserRole(""); // Clear the user role
-    localStorage.clear(); // Optional: Clear localStorage if needed
-    navigate("/"); // Redirect to login or home page
+    setUserRole("");
+    localStorage.clear();
+    navigate("/");
   };
 
   return (

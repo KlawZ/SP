@@ -11,32 +11,32 @@
 }
 
 .intro {
-  text-align: center; /* Center text within .intro */
+  text-align: center;
   padding-bottom: 10px;
 }
 
 .btn-custom {
   padding: 10px 20px;
-  border-radius: 25px; /* Rounded edges */
-  font-size: 16px; /* Larger text */
+  border-radius: 25px;
+  font-size: 16px;
   transition: background-color 0.3s ease, transform 0.3s ease;
   margin: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn-custom:hover {
-  background-color: #007bff; /* Change to primary color on hover */
-  color: white; /* White text on hover */
-  transform: translateY(-2px); /* Slight lift on hover */
+  background-color: #007bff;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .register-btn {
-  background-color: #28a745; /* Green for Register */
+  background-color: #28a745;
   color: white;
 }
 
 .login-btn {
-  background-color: #ffc107; /* Yellow for Login */
+  background-color: #ffc107;
   color: white;
 }
 

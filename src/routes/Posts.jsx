@@ -10,19 +10,17 @@ const Posts = () => {
   const { userRole } = useStateContext();
   const [posts, setPosts] = useState([]);
 
-  // Function to fetch all posts
   const fetchPosts = async () => {
     try {
       const response = await axios.get(
         "http://localhost:3000/api/v1/investors/posts"
       );
-      setPosts(response.data.data); // Assuming response contains 'data' with an array of posts
+      setPosts(response.data.data);
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
   };
 
-  // Fetch posts on component mount if userRole is investor
   useEffect(() => {
     if (userRole === "investor") {
       fetchPosts();
